@@ -1,7 +1,7 @@
 WITH
   order_items AS (
     SELECT
-      inventory_item_id,
+      product_id,
       delivered_at,
       ROUND(SUM(sale_price), 2) as total_sale_price,
       COUNT(order_id) as num_of_order
@@ -15,24 +15,24 @@ WITH
           TIMESTAMP_SUB(TIMESTAMP(DATE '2022-05-01'), INTERVAL 1 SECOND)
       )
     GROUP BY 
-      inventory_item_id,
+      product_id,
       delivered_at
   ),
-  inventory_items AS (
+  products AS (
     SELECT 
       id,
-      product_category,
-    FROM `bigquery-public-data.thelook_ecommerce.inventory_items`
+      category,
+    FROM `bigquery-public-data.thelook_ecommerce.products`
   ),
   revenue AS (
     SELECT
       FORMAT_TIMESTAMP("%B %Y", TIMESTAMP(order_items.delivered_at)) as month,
       EXTRACT(MONTH FROM TIMESTAMP(order_items.delivered_at)) AS month_delivered,
       EXTRACT(YEAR FROM TIMESTAMP(order_items.delivered_at)) AS year_delivered,
-      product_category,
+      category AS product_category,
       ROUND(SUM(total_sale_price), 2) AS revenue_amount,
       SUM(num_of_order) as total_order
-    FROM order_items JOIN inventory_items ON order_items.inventory_item_id = inventory_items.id
+    FROM order_items JOIN products ON order_items.product_id = products.id
     GROUP BY
       month,
       product_category,
@@ -80,14 +80,18 @@ SELECT
     ,2
   ) AS revenue_growth_in_percent
 FROM revenue
+-- Uncomment if you need to see per product category
+/*
+WHERE product_category = "Jeans"
+*/
 WINDOW product_category_window AS (
   PARTITION BY product_category
   ORDER BY 
-    revenue.year_delivered ASC,
-    revenue.month_delivered ASC,
+    year_delivered ASC,
+    month_delivered ASC,
     product_category
 )
 ORDER BY
-  revenue.year_delivered DESC,
-  revenue.month_delivered DESC,
+  year_delivered DESC,
+  month_delivered DESC,
   product_category

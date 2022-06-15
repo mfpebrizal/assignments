@@ -18,7 +18,7 @@ WITH
   ),
   order_items AS (
     SELECT 
-      inventory_item_id,
+      product_id,
       sale_price,
       FORMAT_TIMESTAMP("%d %B %Y", TIMESTAMP(delivered_at)) as month,
       EXTRACT(MONTH FROM TIMESTAMP(delivered_at)) AS month_delivered,
@@ -35,19 +35,18 @@ WITH
         TIMESTAMP(dr.end_date)
     WHERE oi.status = "Complete"
   ),
-  inventory_items AS (
+  products AS (
     SELECT 
-      id,
-      cost,
-      product_category,
-    FROM `bigquery-public-data.thelook_ecommerce.inventory_items`
+      id AS product_id,
+      category,
+    FROM `bigquery-public-data.thelook_ecommerce.products`
   ),
   main AS (
     SELECT
-      month as date_month,
-      product_category,
+      month AS date_month,
+      category AS product_category,
       ROUND(SUM(sale_price), 2) as revenue
-    FROM order_items JOIN inventory_items ON order_items.inventory_item_id = inventory_items.id
+    FROM order_items JOIN products USING(product_id)
     GROUP BY 
       product_category,
       month,         

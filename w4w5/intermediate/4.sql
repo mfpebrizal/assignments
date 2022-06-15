@@ -1,7 +1,7 @@
 WITH
   order_items AS (
     SELECT 
-      inventory_item_id,
+      product_id,
       sale_price,
       FORMAT_TIMESTAMP("%B %Y", TIMESTAMP(delivered_at)) as month,
       EXTRACT(MONTH FROM TIMESTAMP(delivered_at)) AS month_delivered,
@@ -9,20 +9,17 @@ WITH
     FROM `bigquery-public-data.thelook_ecommerce.order_items`
     WHERE status = "Complete"
   ),
-  inventory_items AS (
+  products AS (
     SELECT
-      id,
-      product_id,
+      id AS product_id,
       cost,
-      product_name
-    FROM `bigquery-public-data.thelook_ecommerce.inventory_items`
+      name
+    FROM `bigquery-public-data.thelook_ecommerce.products`
   ),
   sales_info AS (
     SELECT
       month,
-      * EXCEPT(
-        id, 
-        inventory_item_id,
+      * EXCEPT( 
         sale_price,
         cost,
         month
@@ -30,13 +27,13 @@ WITH
       SUM(ROUND(sale_price, 2)) AS sales,
       SUM(ROUND(cost, 2)) AS product_cost,
       SUM(ROUND(sale_price - cost, 2)) AS profit,
-    FROM order_items JOIN inventory_items ON order_items.inventory_item_id = inventory_items.id
+    FROM order_items JOIN products USING(product_id)
     GROUP BY
       month,
-      product_id,
-      product_name,
+      name,
       year_delivered,
-      month_delivered
+      month_delivered,
+      product_id
   ),
   ranks AS (
     SELECT 
