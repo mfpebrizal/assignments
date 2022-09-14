@@ -58,7 +58,7 @@ SELECT
         LAG(total_order)
           OVER(product_category_window)
       ) / LAG(total_order)
-          OVER(product_category_window) *100
+          OVER(product_category_window)
     )
     ,2
   ) AS order_growth_in_percent,
@@ -75,12 +75,12 @@ SELECT
         LAG(revenue_amount)
           OVER(product_category_window)
       ) / LAG(revenue_amount)
-          OVER(product_category_window) *100
+          OVER(product_category_window)
     )
     ,2
   ) AS revenue_growth_in_percent
 FROM revenue
--- Uncomment if you need to see per product category
+-- Uncomment and edit if you need to see per product category
 /*
 WHERE product_category = "Jeans"
 */
@@ -93,5 +93,5 @@ WINDOW product_category_window AS (
 )
 ORDER BY
   year_delivered DESC,
-  month_delivered DESC,
-  product_category
+  month_delivered ASC,
+  product_category;

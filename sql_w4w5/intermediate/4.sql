@@ -51,6 +51,6 @@ WITH
       month_delivered ASC,
       profit DESC
   )
-SELECT * from ranks
+SELECT * FROM ranks
 WHERE
   rank_per_month <= 5;

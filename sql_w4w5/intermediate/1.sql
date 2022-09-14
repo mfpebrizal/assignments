@@ -1,4 +1,3 @@
-
 WITH
   orders AS(
     SELECT
