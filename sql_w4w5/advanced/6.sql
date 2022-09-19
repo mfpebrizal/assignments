@@ -93,5 +93,5 @@ WINDOW product_category_window AS (
 )
 ORDER BY
   year_delivered DESC,
-  month_delivered ASC,
+  month_delivered DESC,
   product_category;
